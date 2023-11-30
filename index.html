@@ -47,8 +47,22 @@
             top: -650px;
             width: 80%;
             height: 500px;
-            
-        
+        }
+        .pic {
+            position: relative;
+            top: -950px;
+            left: 1200px;
+        }
+        .pic p {
+            color: #e0e0e0;
+        }
+        .vid {
+            position: relative;
+            top: -1800px;
+            left: 1200px;
+        }
+        .vid p {
+            color: #e0e0e0;
         }
         .main p {
             color: #e0e0e0;
@@ -71,9 +85,13 @@
             left: 400px;
         
         }
-        .imgs {
-            top: -100px;
-            left: 100px;
+        .card{
+            position: relative;
+            top: 500px;
+            left: 40%;
+        }
+        .card p {
+            color: #e0e0e0;
         }
         .collapsible {
             background-color: #3a3a3a;
@@ -104,6 +122,13 @@
             margin-left: 5px;
 
         }
+        .big_margin {
+            margin-left: 20px;
+            margin-right: 20px;
+        }
+        .big_marginr {
+            margin-right: 80px;
+        }
 
         .active:after {
             font-size: 15px;
@@ -122,7 +147,7 @@
         <p>  <u>Intrests:</u></p>
         <button type="button" class="collapsible">Coding</button>
         <div class="content">
-            <p style="font-size: 15px;">-Python<br>- PY-cord<br>- HTML (obviosly)
+            <p style="font-size: 15px;">-Python<br>- PY-cord<br>- HTML (obviously)
         </div>
         <button type="button" class="collapsible">Water sports</button>
         <div class="content">
@@ -155,8 +180,8 @@
             <p>I enjoy playing a variety of games with my friends and coding in python as part of this have made a couple of discord bots<br>
                 I have also started to learn HTML and decided to make this website dont ask why. <br>
                 I spend a lot of my time listening to music or watching YouTube. <br>
-                some of my hobbies are white water kayaking, climbing<br>
-                while i may be dyslexic i am still a good reader and enjoy reading books but cant spell and my hand writing is shit<br>
+                2 of my of my hobbies are white water kayaking and climbing<br>
+                while i may be dyslexic i am still a good reader but my hand writing and spelling are really shit<br>
 
             </p>
                 
@@ -164,14 +189,37 @@
         
     </div>
     <div class = "links">
-        <h1 style=" color: #e0e0e0;"> <u>Links:</u></h1>
-        <p><a style = color:aqua; href="https://discord.gg/K9TVeCBPuM">Discord server</a></p>
-        <p><a style="color: #e0e0e0;">Discord Bots:</a></p>
-        <p><a style = color:aqua; href="https://top.gg/bot/1041320378137587762">Snowflake</a></p>
-        <p><a style = color:aqua; href="https://top.gg/bot/1161697414013534378">Avalanche</a></p>
+        <h1 style=" color: #e0e0e0; size: 10px;"> <font size="4"><u>Links:</u></font></h1>
+        <p>
+            <a class="big_marginr"  style = color:aqua; href="https://github.com/Snowyshrunk/">Github</a>
+            <a class="big_marginr" style = color:aqua; href="https://discord.gg/K9TVeCBPuM">Discord server</a>
+            <a class="big_margin" style="color: #e0e0e0;">Discord Bots:</a>
+            <a class="big_margin" style = color:aqua; href="https://top.gg/bot/1041320378137587762">Snowflake</a>
+            <a class="big_margin" style = color:aqua; href="https://top.gg/bot/1161697414013534378">Avalanche</a>
+            <a class="big_margin" style = color:aqua; href="https://github.com/Snowyshrunk/Discord-bots-snowy708">Code</a>
+        </p>
     </div>
-    <div class = "imgs">
-        <img src="main/spotify_2023_wraped.jpeg" alt="my spotifiy 2023 wraped" width="100" height="200"/>
+    <div class = "pic">
+        <img src="spotify_2023_wraped.jpeg" alt="image" height = "470" width="300"/>
+        <p> i listen to music way too much</p>
+    </div>
+    <div class = "vid">
+        <video src="hand_role.mp4" autoplay muted loop height= "200" width="300">
+            <p>
+              Oh no! Your browser doesn't support video ;-;.<br>
+              id and a YouTube link but icba
+            </p>
+          </video> 
+        <p> idk why but heres a vid of me rolling a kayak<br>
+            with my hands.<br> 
+            why this vid? cause its only interesting vid<br> 
+            i had on hand at the time of writing this
+        </p>         
+    </div>
+    <div class = "card">
+        <p> if u scrolled this far<br> WELL DONE!!<br> you win my bank details<br>
+        </p>
+        <img src = "visa_card.png" alt="card pic" height="200" width="320"/> 
     </div>
 </body>
 </html>
