@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VRFamo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Droid+Sans+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* Global Styles */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Droid Sans Mono', monospace;
+            background: linear-gradient(to bottom right, #6a0dad, #9b30b0); /* Purple Gradient */
+            color: #e0e0e0;
+            animation: fadeIn 1s ease-out;
+            position: relative;
+            overflow: hidden; /* Prevent scrollbars from appearing */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header */
+        #nav {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #000000;
+            border-bottom: 2px solid #444;
+            z-index: 10;
+            position: relative;
+        }
+
+        #nav img {
+            height: 100px;
+            width: auto;
+            margin-bottom: 10px;
+            animation: fadeIn 1.5s ease;
+        }
+
+        #nav p {
+            font-size: 120%;
+            color: #aaa;
+            margin: 5px 0;
+        }
+
+        #nav h1 {
+            font-size: 3rem;
+            background: linear-gradient(90deg, #a8c0ff, #6a0dad); /* Purple Glow */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes textGlow {
+            0%, 100% { text-shadow: 0 0 5px #a8c0ff, 0 0 10px #6a0dad; }
+            50% { text-shadow: 0 0 15px #a8c0ff, 0 0 30px #6a0dad; }
+        }
+
+        /* Main content */
+        .main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            animation: fadeIn 1.3s ease-out;
+            z-index: 10;
+        }
+
+        .main h1 {
+            text-decoration: underline;
+            margin-bottom: 15px;
+            z-index: 10;
+        }
+
+        .main p {
+            font-size: 18px;
+            line-height: 1.6;
+            z-index: 10;
+        }
+
+        /* Schedule container */
+        .schedule-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 0 20px 40px;
+        }
+
+        .schedule-title {
+            font-size: 2rem;
+            color: #d580ff;
+            margin-bottom: 20px;
+            text-decoration: underline;
+            z-index: 10;
+        }
+
+        /* Schedule styles */
+        .schedule {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            gap: 15px;
+            animation: fadeIn 1.7s ease-out;
+            z-index: 10;
+        }
+
+        .day {
+            flex: 1 1 0;
+            background: #222;
+            border-radius: 10px;
+            padding: 15px;
+            box-sizing: border-box;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .day h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+            color: #d580ff;
+            text-align: center;
+            z-index: 10;
+        }
+        .events {
+            flex-grow: 1;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .event {
+            background: #3a1a73;
+            margin-bottom: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            box-shadow: 0 0 6px #a020f0;
+            color: #e0d6ff;
+        }
+
+        /* Links Section */
+        .links {
+            text-align: center;
+            z-index: 5;
+            position: relative;
+        }
+        .links h1 {
+            margin-bottom: 20px;
+            text-decoration: underline;
+        }
+
+        .links a {
+            display: inline-block;
+            margin: 10px 15px;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #0ff;
+            border: 2px solid #0ff;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: 0.3s ease;
+        }
+
+        .links a:hover {
+            background: #0ff;
+            color: #1a1a1a;
+            transform: scale(1.05);
+        }
+
+        /* Canvas Styling */
+        #particlesCanvas {
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0; /* Ensure particles are behind content */
+        }
+    </style>
+</head>
+<body>
+    <!-- Particles Background Canvas -->
+    <canvas id="particlesCanvas"></canvas>
+
+    <div id="nav">
+        <img src="logo.png" alt="VRFamo Logo">
+        <h1>VRFamo</h1>
+    </div>
+
+    <div class="main">
+        <h1>About VRFamo</h1>
+        <p>VRFamo is a VR Chat content creator focused on delivering fun, chaotic, and immersive VR moments across TikTok. Whether it's wild avatars, weird roleplays, or unexpected dance parties, VRFamo captures it all.</p>
+        <p>Follow for a front-row seat to the virtual universe — where imagination meets memes, and reality is optional.</p>
+    </div>
+
+    <div class="schedule-container">
+        <div class="schedule-title">Stream Schedule</div>
+        <div class="schedule" aria-label="Weekly Schedule">
+            <div class="day">
+                <h2>Monday</h2>
+                <div class="events">
+                    <div class="event">Stream:</br> 7 PM - 9 PM</div>
+                </div>
+            </div>
+            <div class="day">
+                <h2>Tuesday</h2>
+                <div class="events"></div>
+            </div>
+            <div class="day">
+                <h2>Wednesday</h2>
+                <div class="events"></div>
+            </div>
+            <div class="day">
+                <h2>Thursday</h2>
+                <div class="events">
+                    <div class="event">Stream:</br> 7 PM - 9 PM</div>
+                </div>
+            </div>
+            <div class="day">
+                <h2>Friday</h2>
+                <div class="events"></div>
+            </div>
+            <div class="day">
+                <h2>Saturday</h2>
+                <div class="events">
+                    <div class="event">Stream:</br> 7 PM - 9 PM</div>
+                </div>
+            </div>
+            <div class="day">
+                <h2>Sunday</h2>
+                <div class="events">
+                    <div class="event">Stream:</br> 7 PM - 9 PM</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="links">
+        <h1>Socials</h1>
+        <a href="https://www.tiktok.com/@vrfamo" target="_blank" rel="noopener noreferrer">TikTok</a>
+        <a href="https://www.vrchat.com/home/user" target="_blank" rel="noopener noreferrer">VRChat</a>
+        <a href="https://twitter.com/vrfamo" target="_blank" rel="noopener noreferrer">Twitter</a>
+    </div>
+
+    <!-- JavaScript for Particles -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const canvas = document.getElementById("particlesCanvas");
+            const ctx = canvas.getContext("2d");
+
+            // Resize canvas to fill screen
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+
+            // Particle class
+            class Particle {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.size = Math.random() * 3 + 1; // Random size
+                    this.speedX = Math.random() * 3 - 1.5; // Random horizontal speed
+                    this.speedY = Math.random() * 3 - 1.5; // Random vertical speed
+                    this.color = "rgba(156, 79, 185, 0.8)"; // Warm purple color
+                }
+
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+
+                    // Wrap particles around when they go out of bounds
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.y > canvas.height) this.y = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                }
+
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Create particles at random positions
+            function createParticles(num) {
+                for (let i = 0; i < num; i++) {
+                    const x = Math.random() * canvas.width;
+                    const y = Math.random() * canvas.height;
+                    particles.push(new Particle(x, y));
+                }
+            }
+
+            // Animate particles
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                }
+                requestAnimationFrame(animateParticles);
+            }
+
+            // Create an initial batch of particles
+            createParticles(100); // You can adjust this number to have more or fewer particles
+
+            // Start the animation loop
+            animateParticles();
+
+            // Resize the canvas when the window is resized
+            window.addEventListener("resize", function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>
