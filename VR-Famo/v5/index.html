@@ -199,36 +199,44 @@
         <div class="schedule" aria-label="Weekly Schedule">
             <div class="day">
                 <h2>Monday</h2>
-                <div class="events"><div class="event">Stream:</br>7:30PM - 9:30PM</div></div>
+                <div class="events">
+                    <div class="event" data-day="Monday" data-start="19:30" data-end="21:30" data-timezone="Europe/London">
+                        Stream:<br>Loading...
+                    </div>
+                </div>
             </div>
-            <div class="day">
-                <h2>Tuesday</h2>
-                <div class="events"></div>
-            </div>
-            <div class="day">
-                <h2>Wednesday</h2>
-                <div class="events"></div>
-            </div>
+            <div class="day"><h2>Tuesday</h2><div class="events"></div></div>
+            <div class="day"><h2>Wednesday</h2><div class="events"></div></div>
             <div class="day">
                 <h2>Thursday</h2>
-                <div class="events"><div class="event">Stream:</br>7:30PM - 9:30PM</div></div>
+                <div class="events">
+                    <div class="event" data-day="Thursday" data-start="19:30" data-end="21:30" data-timezone="Europe/London">
+                        Stream:<br>Loading...
+                    </div>
+                </div>
             </div>
             <div class="day">
                 <h2>Friday</h2>
-                <div class="events"><div class="event">Stream:</br>7:30PM - 9:30PM</div></div>
+                <div class="events">
+                    <div class="event" data-day="Friday" data-start="19:30" data-end="21:30" data-timezone="Europe/London">
+                        Stream:<br>Loading...
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
     <div class="schedule-container">
         <div class="schedule" aria-label="Weekly Schedule">
             <div class="day">
                 <h2>Saturday</h2>
-                <div class="events"><div class="event">Stream:</br>7:30PM - 9:30PM</div></div>
+                <div class="events">
+                    <div class="event" data-day="Saturday" data-start="19:30" data-end="21:30" data-timezone="Europe/London">
+                        Stream:<br>Loading...
+                    </div>
+                </div>
             </div>
-            <div class="day">
-                <h2>Sunday</h2>
-                <div class="events"></div>
-            </div>
+            <div class="day"><h2>Sunday</h2><div class="events"></div></div>
         </div>
         <div class="links">
             <h1>Socials</h1>
@@ -239,7 +247,7 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const canvas = document.getElementById("particlesCanvas");
             const ctx = canvas.getContext("2d");
 
@@ -261,8 +269,6 @@
                 update() {
                     this.x += this.speedX;
                     this.y += this.speedY;
-
-
                     if (this.x > canvas.width) this.x = 0;
                     if (this.x < 0) this.x = canvas.width;
                     if (this.y > canvas.height) this.y = 0;
@@ -295,12 +301,43 @@
             }
 
             createParticles(100);
-
             animateParticles();
 
-            window.addEventListener("resize", function() {
+            window.addEventListener("resize", function () {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
+            });
+            const events = document.querySelectorAll('.event');
+
+            events.forEach(event => {
+                const startTime = event.getAttribute('data-start');
+                const endTime = event.getAttribute('data-end');
+                const sourceTZ = event.getAttribute('data-timezone');
+
+                if (!startTime || !endTime || !sourceTZ) return;
+
+                const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+                const dateStr = new Date().toISOString().split('T')[0];
+
+                const start = new Date(`${dateStr}T${startTime}:00`);
+                const end = new Date(`${dateStr}T${endTime}:00`);
+
+                const startLocal = new Intl.DateTimeFormat('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                    timeZone: userTZ
+                }).format(new Date(start.toLocaleString('en-US', { timeZone: sourceTZ })));
+
+                const endLocal = new Intl.DateTimeFormat('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                    timeZone: userTZ
+                }).format(new Date(end.toLocaleString('en-US', { timeZone: sourceTZ })));
+
+                event.innerHTML = `Stream:<br>${startLocal} - ${endLocal}`;
             });
         });
     </script>
