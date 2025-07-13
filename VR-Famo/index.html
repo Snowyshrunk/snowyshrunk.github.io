@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VR-Famo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Droid+Sans+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Droid Sans Mono', monospace;
+            background: linear-gradient(to bottom right, #6a0dad, #9b30b0);
+            color: #e0e0e0;
+            animation: fadeIn 1s ease-out;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #nav {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #000000;
+            border-bottom: 2px solid #444;
+            z-index: 10;
+            position: relative;
+        }
+
+        #nav img {
+            height: 200px;
+            width: auto;
+            margin-bottom: 10px;
+            animation: fadeIn 1.5s ease;
+        }
+
+        #nav p {
+            font-size: 120%;
+            color: #aaa;
+            margin: 5px 0;
+        }
+
+        #nav h1 {
+            font-size: 3rem;
+            background: linear-gradient(90deg, #a8c0ff, #6a0dad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes textGlow {
+            0%, 100% { text-shadow: 0 0 5px #a8c0ff, 0 0 10px #6a0dad; }
+            50% { text-shadow: 0 0 15px #a8c0ff, 0 0 30px #6a0dad; }
+        }
+
+        .main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            animation: fadeIn 1.3s ease-out;
+            z-index: 10;
+            text-align: center
+        }
+
+        .main h1 {
+            text-decoration: underline;
+            margin-bottom: 15px;
+            z-index: 10;
+        }
+
+        .main p {
+            font-size: 18px;
+            line-height: 1.6;
+            z-index: 10;
+        }
+
+        .schedule-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 0 20px 40px;
+        }
+
+        .schedule-title {
+            font-size: 2rem;
+            color: #d580ff;
+            margin-bottom: 20px;
+            text-decoration: underline;
+            z-index: 10;
+        }
+
+        .schedule {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            gap: 15px;
+            animation: fadeIn 1.7s ease-out;
+            z-index: 10;
+        }
+
+        .day {
+            flex: 1 1 0;
+            background: #222;
+            border-radius: 10px;
+            padding: 15px;
+            box-sizing: border-box;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .day h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+            color: #d580ff;
+            text-align: center;
+            z-index: 10;
+        }
+        .events {
+            flex-grow: 1;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .event {
+            background: #3a1a73;
+            margin-bottom: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            box-shadow: 0 0 6px #a020f0;
+            color: #e0d6ff;
+        }
+
+        .links {
+            text-align: center;
+            z-index: 5;
+            position: relative;
+            margin-bottom: 60px;
+        }
+        .links h1 {
+            margin-bottom: 20px;
+            text-decoration: underline;
+        }
+
+        .links a {
+            display: inline-block;
+            margin: 10px 15px;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #0ff;
+            border: 2px solid #0ff;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: 0.3s ease;
+        }
+
+        .links a:hover {
+            background: #0ff;
+            color: #1a1a1a;
+            transform: scale(1.05);
+        }
+
+        #particlesCanvas {
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particlesCanvas"></canvas>
+
+    <div id="nav">
+        <img src="logo.jpg" alt="VRFamo Logo">
+    </div>
+
+    <div class="main">
+        <h1>VRFamo</h1>
+        <p>This is just a small website for our links and schedule<br>(Our schedule may change)</p>
+    </div>
+    <div class="links">
+        <h1>Socials</h1>
+        <a href="https://www.tiktok.com/@vr.famo/" target="_blank" rel="noopener noreferrer">TikTok</a>
+        <a href="https://vrc.group/VRFAMO.0864" target="_blank" rel="noopener noreferrer">VRChat Group</a>
+        <a href="https://discord.gg/dKEu6t8THe" target="_blank" rel="noopener noreferrer">Discord</a>
+    </div>
+
+    <div class="schedule-container">
+        <div class="schedule-title">Stream Schedule</div>
+        <div class="schedule" aria-label="Weekly Schedule">
+            <div class="day">
+                <h2>Monday</h2>
+                <div class="events">
+                    <div class="event" data-day="Monday" data-start="19:30" data-end="21:30" data-timezone="Europe/London">
+                        Stream:<br>Loading...
+                    </div>
+                </div>
+            </div>
+            <div class="day"><h2>Tuesday</h2><div class="events"></div></div>
+            <div class="day"><h2>Wednesday</h2><div class="events"></div></div>
+            <div class="day">
+                <h2>Thursday</h2>
+                <div class="events">
+                    <div class="event" data-day="Thursday" data-start="19:30" data-end="21:30" data-timezone="Europe/London">
+                        Stream:<br>Loading...
+                    </div>
+                </div>
+            </div>
+            <div class="day">
+                <h2>Friday</h2>
+                <div class="events">
+                    <div class="event" data-day="Friday" data-start="19:30" data-end="21:30" data-timezone="Europe/London">
+                        Stream:<br>Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="schedule-container">
+        <div class="schedule" aria-label="Weekly Schedule">
+            <div class="day">
+                <h2>Saturday</h2>
+                <div class="events">
+                    <div class="event" data-day="Saturday" data-start="19:30" data-end="21:30" data-timezone="Europe/London">
+                        Stream:<br>Loading...
+                    </div>
+                </div>
+            </div>
+            <div class="day"><h2>Sunday</h2><div class="events"></div></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const canvas = document.getElementById("particlesCanvas");
+            const ctx = canvas.getContext("2d");
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+
+            class Particle {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = Math.random() * 3 - 1.5;
+                    this.speedY = Math.random() * 3 - 1.5;
+                    this.color = "rgba(156, 79, 185, 0.8)";
+                }
+
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.y > canvas.height) this.y = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                }
+
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function createParticles(num) {
+                for (let i = 0; i < num; i++) {
+                    const x = Math.random() * canvas.width;
+                    const y = Math.random() * canvas.height;
+                    particles.push(new Particle(x, y));
+                }
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                }
+                requestAnimationFrame(animateParticles);
+            }
+
+            createParticles(100);
+            animateParticles();
+
+            window.addEventListener("resize", function () {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+            const events = document.querySelectorAll('.event');
+
+            events.forEach(event => {
+                const startTime = event.getAttribute('data-start');
+                const endTime = event.getAttribute('data-end');
+                const sourceTZ = event.getAttribute('data-timezone');
+
+                if (!startTime || !endTime || !sourceTZ) return;
+
+                const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+                const dateStr = new Date().toISOString().split('T')[0];
+
+                const start = new Date(`${dateStr}T${startTime}:00`);
+                const end = new Date(`${dateStr}T${endTime}:00`);
+
+                const startLocal = new Intl.DateTimeFormat('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                    timeZone: userTZ
+                }).format(new Date(start.toLocaleString('en-US', { timeZone: sourceTZ })));
+
+                const endLocal = new Intl.DateTimeFormat('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                    timeZone: userTZ
+                }).format(new Date(end.toLocaleString('en-US', { timeZone: sourceTZ })));
+
+                event.innerHTML = `Stream:<br>${startLocal} - ${endLocal}`;
+            });
+        });
+    </script>
+</body>
+</html>
