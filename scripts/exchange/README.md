@@ -3,6 +3,8 @@
 ## Overview
 This document analyzes a PowerShell script designed to grant FullAccess and SendAs permissions to users on Exchange Online mailboxes.
 
+**Total Issues Identified: 10** (5 Critical, 3 Medium, 2 Minor)
+
 ## Issues Identified
 
 ### 🔴 Critical Issues
@@ -93,9 +95,59 @@ catch {
 }
 ```
 
+#### 5. Trustee/User Format Mismatch in Permission Checks
+**Location:** Lines 30-31 (SendAs check) and 15-16 (FullAccess check) in original script
+
+**Problem:** Exchange Online returns Trustee/User values in different formats depending on how identities are stored:
+- Full UPN: `john@contoso.com`
+- Domain\Username: `CONTOSO\john`
+- Just username: `john`
+- Display name: `John Smith`
+- SID format: `S-1-5-21-...`
+
+Using strict equality (`$_.Trustee -eq $usr.User`) causes:
+- False negatives: Script thinks permission doesn't exist when it does
+- Duplicate attempts: Script tries to add permission that already exists
+- Silent failures: Permission grant fails because it already exists
+
+**Impact:** High - SendAs permissions fail to apply because existing permissions aren't detected
+
+**Fix:**
+```powershell
+# Get all SendAs permissions
+$allPermissions = Get-RecipientPermission -Identity $mbx.Mailbox -ErrorAction Stop |
+                  Where-Object { $_.AccessRights -contains "SendAs" }
+
+# Check multiple format variations
+$existingSA = $allPermissions | Where-Object { 
+    ($_.Trustee -eq $usr.User) -or                    # Exact match
+    ($_.Trustee -like "*\$($usr.User)") -or          # DOMAIN\User format
+    ($_.Trustee -eq $usr.User.Split('@')[0])         # Username without domain
+}
+
+# Filter out system accounts
+$existingSA = $existingSA | Where-Object { $_.Trustee -ne "NT AUTHORITY\SELF" }
+
+# Also handle case where permission exists but check didn't detect it
+if (-not $existingSA) {
+    try {
+        Add-RecipientPermission -Identity $mbx.Mailbox -Trustee $usr.User `
+            -AccessRights SendAs -Confirm:$false -ErrorAction Stop
+    }
+    catch {
+        if ($_.Exception.Message -like "*already has permission*") {
+            Write-Host "Permission already exists (not detected in check)"
+        }
+        else {
+            throw
+        }
+    }
+}
+```
+
 ### 🟡 Medium Issues
 
-#### 5. Inherited Permissions Not Filtered
+#### 6. Inherited Permissions Not Filtered
 **Location:** Lines 13-14
 
 **Problem:** The check for existing FullAccess doesn't exclude inherited permissions, potentially causing false positives.
@@ -112,7 +164,7 @@ $existingFA = Get-MailboxPermission -Identity $mbx.Mailbox |
     }
 ```
 
-#### 6. Missing Script Requirements
+#### 7. Missing Script Requirements
 **Location:** Top of script
 
 **Problem:** No `#Requires` statement to ensure ExchangeOnlineManagement module is available.
@@ -124,7 +176,7 @@ $existingFA = Get-MailboxPermission -Identity $mbx.Mailbox |
 #Requires -Modules ExchangeOnlineManagement
 ```
 
-#### 7. No Progress Tracking
+#### 8. No Progress Tracking
 **Location:** Throughout script
 
 **Problem:** No summary of:
@@ -145,7 +197,7 @@ Write-Host "Errors encountered: $errorCount"
 
 ### 🟢 Minor Issues
 
-#### 8. Disconnect on Error
+#### 9. Disconnect on Error
 **Location:** End of script
 
 **Problem:** If script errors out early, Exchange Online session may remain connected.
@@ -163,7 +215,7 @@ finally {
 }
 ```
 
-#### 9. No InheritanceType Specified
+#### 10. No InheritanceType Specified
 **Location:** Line 19
 
 **Problem:** `Add-MailboxPermission` doesn't specify `-InheritanceType`, relying on default behavior.
@@ -242,11 +294,75 @@ jane@contoso.com
 
 ✅ **Always validate inputs** before processing
 
+✅ **Use flexible Trustee/User matching** - Exchange returns identities in multiple formats (UPN, DOMAIN\User, username)
+
 ✅ **Filter inherited permissions** when checking for existing access
 
 ✅ **Track and report** success/failure statistics
 
 ✅ **Handle connection failures** gracefully
+
+✅ **Catch "already has permission" errors** as a fallback when detection fails
+
+## Troubleshooting SendAs Permissions
+
+If SendAs permissions aren't being applied, check the following:
+
+### 1. Verify Permission Detection
+Run this command manually to see how Exchange stores the Trustee:
+```powershell
+Get-RecipientPermission -Identity "mailbox@contoso.com" | 
+    Where-Object { $_.AccessRights -contains "SendAs" } | 
+    Select-Object Identity, Trustee, AccessRights
+```
+
+Common Trustee format variations:
+- `user@contoso.com` - Full UPN
+- `CONTOSO\user` - Domain\Username
+- `user` - Username only
+- `User Display Name` - Display name
+
+### 2. Check for Existing Permissions
+The script may report "already exists" if permissions were granted previously:
+```powershell
+# Check for specific user
+Get-RecipientPermission -Identity "mailbox@contoso.com" -Trustee "user@contoso.com"
+```
+
+### 3. Verify User Identity Format in CSV
+Ensure your users.csv uses the same format Exchange expects:
+```csv
+User
+john.smith@contoso.com
+jane.doe@contoso.com
+```
+
+### 4. Check for Permission Propagation Delays
+Exchange Online permissions can take 15-60 minutes to propagate. Wait and verify:
+```powershell
+# Wait 30 minutes, then check again
+Get-RecipientPermission -Identity "mailbox@contoso.com" | 
+    Where-Object { $_.Trustee -like "*john*" }
+```
+
+### 5. Review Error Messages
+If you see errors like:
+- **"Object not found"** - Mailbox or user doesn't exist or is incorrect format
+- **"already has permission"** - Permission exists but wasn't detected by the check
+- **"Access denied"** - Your account lacks permissions to grant SendAs rights
+
+### 6. Verify Required Permissions
+Your admin account needs:
+- Exchange Administrator role OR
+- Mailbox Import Export role AND Recipient Permissions role
+
+### 7. Enable Debug Output
+Add verbose output to see what's happening:
+```powershell
+$VerbosePreference = "Continue"
+# Run the script
+$VerbosePreference = "SilentlyContinue"
+```
 
 ## Additional Resources
 

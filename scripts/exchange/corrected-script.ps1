@@ -75,19 +75,42 @@ foreach ($mbx in $mailboxes) {
         # 1. FULL ACCESS PERMISSION
         # --------------------------
         try {
-            $existingFA = Get-MailboxPermission -Identity $mbx.Mailbox -ErrorAction Stop |
-                          Where-Object { $_.User -eq $usr.User -and $_.AccessRights -contains "FullAccess" -and $_.IsInherited -eq $false }
+            # Get all FullAccess permissions for the mailbox (non-inherited)
+            $allFAPermissions = Get-MailboxPermission -Identity $mbx.Mailbox -ErrorAction Stop |
+                                Where-Object { $_.AccessRights -contains "FullAccess" -and $_.IsInherited -eq $false }
+            
+            # Check if permission exists - User format can vary
+            $existingFA = $allFAPermissions | Where-Object { 
+                ($_.User -eq $usr.User) -or 
+                ($_.User -like "*\$($usr.User)") -or
+                ($_.User -eq $usr.User.Split('@')[0])
+            }
+            
+            # Filter out NT AUTHORITY\SELF
+            $existingFA = $existingFA | Where-Object { $_.User -notlike "NT AUTHORITY\*" -and $_.User -notlike "S-1-5-*" }
 
             if (-not $existingFA) {
                 Write-Host "  Adding FullAccess..." -ForegroundColor Yellow
-                Add-MailboxPermission -Identity $mbx.Mailbox -User $usr.User `
-                    -AccessRights FullAccess -AutoMapping $true `
-                    -InheritanceType All -ErrorAction Stop | Out-Null
-                Write-Host "  FullAccess granted successfully!" -ForegroundColor Green
-                $successCount++
+                try {
+                    Add-MailboxPermission -Identity $mbx.Mailbox -User $usr.User `
+                        -AccessRights FullAccess -AutoMapping $true `
+                        -InheritanceType All -ErrorAction Stop | Out-Null
+                    Write-Host "  FullAccess granted successfully!" -ForegroundColor Green
+                    $successCount++
+                }
+                catch {
+                    # Provide detailed error information
+                    if ($_.Exception.Message -like "*already has permission*") {
+                        Write-Host "  FullAccess permission already exists (not detected in check) — skipping." -ForegroundColor Yellow
+                        $skipCount++
+                    }
+                    else {
+                        throw
+                    }
+                }
             }
             else {
-                Write-Host "  FullAccess already exists — skipping." -ForegroundColor Green
+                Write-Host "  FullAccess already exists (User: $($existingFA.User)) — skipping." -ForegroundColor Green
                 $skipCount++
             }
         }
@@ -100,18 +123,42 @@ foreach ($mbx in $mailboxes) {
         # 2. SEND AS PERMISSION
         # --------------------------
         try {
-            $existingSA = Get-RecipientPermission -Identity $mbx.Mailbox -ErrorAction Stop |
-                          Where-Object { $_.Trustee -eq $usr.User -and $_.AccessRights -contains "SendAs" }
+            # Get all SendAs permissions for the mailbox (exclude NT AUTHORITY\SELF)
+            $allPermissions = Get-RecipientPermission -Identity $mbx.Mailbox -ErrorAction Stop |
+                              Where-Object { $_.AccessRights -contains "SendAs" }
+            
+            # Check if permission exists - Trustee format can vary, so check multiple ways
+            # Trustee might be: "user@domain.com", "DOMAIN\User", "User", or Display Name
+            $existingSA = $allPermissions | Where-Object { 
+                ($_.Trustee -eq $usr.User) -or 
+                ($_.Trustee -like "*\$($usr.User)") -or
+                ($_.Trustee -eq $usr.User.Split('@')[0])
+            }
+            
+            # Filter out NT AUTHORITY\SELF
+            $existingSA = $existingSA | Where-Object { $_.Trustee -ne "NT AUTHORITY\SELF" }
 
             if (-not $existingSA) {
                 Write-Host "  Adding SendAs..." -ForegroundColor Yellow
-                Add-RecipientPermission -Identity $mbx.Mailbox -Trustee $usr.User `
-                    -AccessRights SendAs -Confirm:$false -ErrorAction Stop | Out-Null
-                Write-Host "  SendAs granted successfully!" -ForegroundColor Green
-                $successCount++
+                try {
+                    Add-RecipientPermission -Identity $mbx.Mailbox -Trustee $usr.User `
+                        -AccessRights SendAs -Confirm:$false -ErrorAction Stop | Out-Null
+                    Write-Host "  SendAs granted successfully!" -ForegroundColor Green
+                    $successCount++
+                }
+                catch {
+                    # Provide detailed error information
+                    if ($_.Exception.Message -like "*already has permission*") {
+                        Write-Host "  SendAs permission already exists (not detected in check) — skipping." -ForegroundColor Yellow
+                        $skipCount++
+                    }
+                    else {
+                        throw
+                    }
+                }
             }
             else {
-                Write-Host "  SendAs already exists — skipping." -ForegroundColor Green
+                Write-Host "  SendAs already exists (Trustee: $($existingSA.Trustee)) — skipping." -ForegroundColor Green
                 $skipCount++
             }
         }
