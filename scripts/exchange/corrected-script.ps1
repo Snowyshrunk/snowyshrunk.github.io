@@ -79,15 +79,22 @@ foreach ($mbx in $mailboxes) {
             $allFAPermissions = Get-MailboxPermission -Identity $mbx.Mailbox -ErrorAction Stop |
                                 Where-Object { $_.AccessRights -contains "FullAccess" -and $_.IsInherited -eq $false }
             
-            # Check if permission exists - User format can vary
-            $existingFA = $allFAPermissions | Where-Object { 
-                ($_.User -eq $usr.User) -or 
-                ($_.User -like "*\$($usr.User)") -or
-                ($_.User -eq $usr.User.Split('@')[0])
+            # Filter out system accounts upfront
+            $allFAPermissions = $allFAPermissions | Where-Object { 
+                $_.User -notlike "NT AUTHORITY\*" -and 
+                $_.User -notlike "S-1-5-*" 
             }
             
-            # Filter out NT AUTHORITY\SELF
-            $existingFA = $existingFA | Where-Object { $_.User -notlike "NT AUTHORITY\*" -and $_.User -notlike "S-1-5-*" }
+            # Check if permission exists - User format can vary
+            # Extract username from email if present for comparison
+            $userToMatch = if ($usr.User -like "*@*") { $usr.User.Split('@')[0] } else { $usr.User }
+            
+            $existingFA = $allFAPermissions | Where-Object { 
+                ($_.User -eq $usr.User) -or                              # Exact match
+                ($_.User -eq "NT AUTHORITY\$($usr.User)") -or           # NT AUTHORITY\User
+                ($_.User -match "\\$([regex]::Escape($usr.User))$") -or # DOMAIN\User (exact end match)
+                ($_.User -eq $userToMatch)                               # Username only (from email)
+            }
 
             if (-not $existingFA) {
                 Write-Host "  Adding FullAccess..." -ForegroundColor Yellow
@@ -101,7 +108,7 @@ foreach ($mbx in $mailboxes) {
                 catch {
                     # Provide detailed error information
                     if ($_.Exception.Message -like "*already has permission*") {
-                        Write-Host "  FullAccess permission already exists (not detected in check) — skipping." -ForegroundColor Yellow
+                        Write-Host "  FullAccess permission already exists (not detected in check) -- skipping." -ForegroundColor Yellow
                         $skipCount++
                     }
                     else {
@@ -110,7 +117,9 @@ foreach ($mbx in $mailboxes) {
                 }
             }
             else {
-                Write-Host "  FullAccess already exists (User: $($existingFA.User)) — skipping." -ForegroundColor Green
+                # Handle multiple matches by taking the first one for display
+                $displayUser = if ($existingFA -is [Array]) { $existingFA[0].User } else { $existingFA.User }
+                Write-Host "  FullAccess already exists (User: $displayUser) -- skipping." -ForegroundColor Green
                 $skipCount++
             }
         }
@@ -123,20 +132,26 @@ foreach ($mbx in $mailboxes) {
         # 2. SEND AS PERMISSION
         # --------------------------
         try {
-            # Get all SendAs permissions for the mailbox (exclude NT AUTHORITY\SELF)
+            # Get all SendAs permissions for the mailbox
             $allPermissions = Get-RecipientPermission -Identity $mbx.Mailbox -ErrorAction Stop |
                               Where-Object { $_.AccessRights -contains "SendAs" }
             
-            # Check if permission exists - Trustee format can vary, so check multiple ways
-            # Trustee might be: "user@domain.com", "DOMAIN\User", "User", or Display Name
-            $existingSA = $allPermissions | Where-Object { 
-                ($_.Trustee -eq $usr.User) -or 
-                ($_.Trustee -like "*\$($usr.User)") -or
-                ($_.Trustee -eq $usr.User.Split('@')[0])
+            # Filter out system accounts upfront
+            $allPermissions = $allPermissions | Where-Object { 
+                $_.Trustee -ne "NT AUTHORITY\SELF" -and 
+                $_.Trustee -notlike "S-1-5-*" 
             }
             
-            # Filter out NT AUTHORITY\SELF
-            $existingSA = $existingSA | Where-Object { $_.Trustee -ne "NT AUTHORITY\SELF" }
+            # Check if permission exists - Trustee format can vary, so check multiple ways
+            # Extract username from email if present for comparison
+            $userToMatch = if ($usr.User -like "*@*") { $usr.User.Split('@')[0] } else { $usr.User }
+            
+            $existingSA = $allPermissions | Where-Object { 
+                ($_.Trustee -eq $usr.User) -or                              # Exact match
+                ($_.Trustee -eq "NT AUTHORITY\$($usr.User)") -or           # NT AUTHORITY\User
+                ($_.Trustee -match "\\$([regex]::Escape($usr.User))$") -or # DOMAIN\User (exact end match)
+                ($_.Trustee -eq $userToMatch)                               # Username only (from email)
+            }
 
             if (-not $existingSA) {
                 Write-Host "  Adding SendAs..." -ForegroundColor Yellow
@@ -149,7 +164,7 @@ foreach ($mbx in $mailboxes) {
                 catch {
                     # Provide detailed error information
                     if ($_.Exception.Message -like "*already has permission*") {
-                        Write-Host "  SendAs permission already exists (not detected in check) — skipping." -ForegroundColor Yellow
+                        Write-Host "  SendAs permission already exists (not detected in check) -- skipping." -ForegroundColor Yellow
                         $skipCount++
                     }
                     else {
@@ -158,7 +173,9 @@ foreach ($mbx in $mailboxes) {
                 }
             }
             else {
-                Write-Host "  SendAs already exists (Trustee: $($existingSA.Trustee)) — skipping." -ForegroundColor Green
+                # Handle multiple matches by taking the first one for display
+                $displayTrustee = if ($existingSA -is [Array]) { $existingSA[0].Trustee } else { $existingSA.Trustee }
+                Write-Host "  SendAs already exists (Trustee: $displayTrustee) -- skipping." -ForegroundColor Green
                 $skipCount++
             }
         }

@@ -118,15 +118,22 @@ Using strict equality (`$_.Trustee -eq $usr.User`) causes:
 $allPermissions = Get-RecipientPermission -Identity $mbx.Mailbox -ErrorAction Stop |
                   Where-Object { $_.AccessRights -contains "SendAs" }
 
-# Check multiple format variations
-$existingSA = $allPermissions | Where-Object { 
-    ($_.Trustee -eq $usr.User) -or                    # Exact match
-    ($_.Trustee -like "*\$($usr.User)") -or          # DOMAIN\User format
-    ($_.Trustee -eq $usr.User.Split('@')[0])         # Username without domain
+# Filter out system accounts upfront
+$allPermissions = $allPermissions | Where-Object { 
+    $_.Trustee -ne "NT AUTHORITY\SELF" -and 
+    $_.Trustee -notlike "S-1-5-*" 
 }
 
-# Filter out system accounts
-$existingSA = $existingSA | Where-Object { $_.Trustee -ne "NT AUTHORITY\SELF" }
+# Extract username from email if present for safer comparison
+$userToMatch = if ($usr.User -like "*@*") { $usr.User.Split('@')[0] } else { $usr.User }
+
+# Check multiple format variations with precise matching
+$existingSA = $allPermissions | Where-Object { 
+    ($_.Trustee -eq $usr.User) -or                              # Exact match
+    ($_.Trustee -eq "NT AUTHORITY\$($usr.User)") -or           # NT AUTHORITY\User
+    ($_.Trustee -match "\\$([regex]::Escape($usr.User))$") -or # DOMAIN\User (exact end)
+    ($_.Trustee -eq $userToMatch)                               # Username only
+}
 
 # Also handle case where permission exists but check didn't detect it
 if (-not $existingSA) {
