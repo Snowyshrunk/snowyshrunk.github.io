@@ -1,227 +1,346 @@
-<!DOCTYPE html> 
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snowy</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background-color: #2f2f2f;
+            color: #e0e0e0;
+        }
+
+        a {
+            color: aqua;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
         #nav {
             background: #2f0431;
             text-align: center;
-            overflow: auto;
-            position: relative;
-            width: 100%
-            
+            padding: 1rem 0.75rem 1.4rem;
+            border-bottom: 2px solid #1f0221;
         }
+
         #nav p {
-            font-size: 140%;
-            position: relative;
-            color: #909090;
-            top: 30px;
+            margin: 0.1rem 0;
+            font-size: 1.15rem;
+            color: #a8a8a8;
         }
-        #nav h1{
-            font-size: 350%;
-            position: relative;
-            color: #e0e0e0;        
-            position: relative;
-            top: -20px;
-            height: 80px;
+
+        #nav h1 {
+            margin: 0.2rem 0 0;
+            font-size: clamp(2.1rem, 5vw, 3.2rem);
+            color: #e0e0e0;
         }
-        .intr {
+
+        .layout {
+            max-width: 1300px;
+            margin: 1rem auto 2rem;
+            padding: 0 0.9rem;
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: 280px 1fr 320px;
+            align-items: start;
+        }
+
+        .intr,
+        .main,
+        .links,
+        .pic,
+        .vid,
+        .card {
             background-color: #3a3a3a;
-            text-align: left;
-            left: 0px;
-            width: 280px;
-            height: 650px;
-            position: relative;
-
+            border: 1px solid #4c4c4c;
+            border-radius: 8px;
+            padding: 0.85rem;
         }
+
         .intr p {
-            font-size: 150%;
-            color: #e0e0e0;
+            margin-top: 0;
+            font-size: 1.3rem;
         }
-        .intr dl {
-            color: #e0e0e0;
-        }
-        .main {
-            text-align: left;
-            position: relative; 
-            left: 300px;
-            top: -650px;
-            width: 80%;
-            height: 500px;
-        }
-        .pic {
-            position: relative;
-            top: -950px;
-            left: 1200px;
-        }
-        .pic p {
-            color: #e0e0e0;
-        }
-        .vid {
-            position: relative;
-            top: -1800px;
-            left: 1200px;
-        }
-        .vid p {
-            color: #e0e0e0;
-        }
-        .main p {
-            color: #e0e0e0;
-            font-size: large;
-        }
-        .main h2 {
-            font-size: 80%;
-            color: #e0e0e0;
-            position: relative;
-            top: 20px;
-        }
-        .links{
 
-            position: relative;
-            top: -750px;
-            left: 300px;
+        .intr {
+            padding: 0.95rem;
         }
-        .links p{
-            color: aqua;
-            left: 400px;
-        
+
+        .intr-title {
+            margin: 0 0 0.7rem;
+            font-size: 1.3rem;
         }
-        .card{
-            position: relative;
-            top: 500px;
-            left: 40%;
+
+        .accordion-group {
+            display: grid;
+            gap: 0.55rem;
+            margin-bottom: 0.65rem;
         }
+
+        .main h1,
+        .links h1 {
+            margin-top: 0;
+            color: #e0e0e0;
+        }
+
+        .main p,
+        .main h2,
+        .pic p,
+        .vid p,
         .card p {
             color: #e0e0e0;
+            line-height: 1.45;
         }
+
+        .main h2 {
+            font-size: 0.95rem;
+            color: #c4c4c4;
+            margin-bottom: 0;
+        }
+
         .collapsible {
-            background-color: #3a3a3a;
+            width: 100%;
+            background: #454545;
             color: #e0e0e0;
             cursor: pointer;
-            padding: 0px;
-            border: none;
+            padding: 0.55rem 0.65rem;
+            border: 1px solid #616161;
+            border-radius: 6px;
             text-align: left;
-            outline: none;
-            font-size: 15px;
+            font-size: 0.98rem;
+            font-weight: 600;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
         }
-        .active .collapsible{
-            background-color: #3a3a3a;
+
+        .collapsible:hover {
+            background: #4d4d4d;
+            border-color: #777;
         }
-        .content {
-            padding: 0 18px;
-            background-color: #3a3a3a;
-            max-height: 0;
-            font-size: 15px;
-            overflow: hidden;
-            transition: max-height 0.2s ease-out;
+
+        .collapsible:focus-visible {
+            outline: 2px solid #8b4f96;
+            outline-offset: 2px;
         }
-        .collapsible:after {
-            content: '\1F892'; /* Unicode character for "plus" sign (+) */
-            font-size: 15px;
-            color: #e0e0e0;
+
+        .collapsible::after {
+            content: "▸";
             float: right;
-            margin-left: 5px;
-
-        }
-        .big_margin {
-            margin-left: 20px;
-            margin-right: 20px;
-        }
-        .big_marginr {
-            margin-right: 80px;
+            color: #e0e0e0;
+            transition: transform 0.2s ease;
         }
 
-        .active:after {
-            font-size: 15px;
-            content: "\1F893"; /* Unicode character for "minus" sign (-) */
+        .collapsible.active::after {
+            transform: rotate(90deg);
+        }
+
+        .content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.22s ease-out;
+            font-size: 0.95rem;
+            background: #343434;
+            border-radius: 6px;
+            border: 1px solid #4f4f4f;
+        }
+
+        .content p {
+            margin: 0;
+            padding: 0.6rem 0.7rem;
+            color: #e0e0e0;
+        }
+
+        .content ul {
+            margin: 0;
+            padding: 0.55rem 0.7rem 0.55rem 1.35rem;
+            color: #e0e0e0;
+        }
+
+        .content li {
+            margin: 0.2rem 0;
+        }
+
+        .interest-links {
+            font-size: 0.95rem;
+            margin-top: 0.55rem;
+            margin-bottom: 0;
+            line-height: 1.5;
+            color: #e0e0e0;
+        }
+
+        .links p {
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem 1.15rem;
+        }
+
+        .tag {
+            color: #e0e0e0;
+        }
+
+        .pic img,
+        .vid video,
+        .card img {
+            width: 100%;
+            border-radius: 6px;
+            border: 1px solid #595959;
+        }
+
+        .side-column {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .bottom {
+            grid-column: 1 / -1;
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: 1fr;
+        }
+
+        @media (max-width: 1080px) {
+            .layout {
+                grid-template-columns: 260px 1fr;
+            }
+
+            .side-column {
+                grid-column: 1 / -1;
+                grid-template-columns: repeat(2, minmax(240px, 1fr));
+                display: grid;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .side-column {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
-<head>
-    <div id = "nav">
-        <title>Snowy</title>
-        <p> Hi i'm</p>
+</head>
+<body>
+    <div id="nav">
+        <p>Hi I'm</p>
         <h1>Snowy</h1>
     </div>
-</head>
-<body style = "background-color: #2F2F2F;">
-    <div class = "intr"> 
-        <p>  <u>Intrests:</u></p>
-        <button type="button" class="collapsible">Coding</button>
-        <div class="content">
-            <p style="font-size: 15px;">-Python<br>- PY-cord<br>- HTML (obviously)
-        </div>
-        <button type="button" class="collapsible">Water sports</button>
-        <div class="content">
-            <p style="font-size: 15px;">- White water kayaking<br>- canoeing<br>- paddle boarding
-        </div>
-        <div style="height: 200px;">
-            <a style = " font-size: 15px; height: -500px;" href="https://snowy708.site/games">Gaming</a> 
-            <p style=" font-size: 15px; height: -500px; position:  relative; top: -14px;" > Climbing<br> PC Building<br> D&D
-        </div>
-    </div>
-    <script>
-        var coll = document.getElementsByClassName("collapsible");
-        var i;
-        
-        for (i = 0; i < coll.length; i++) {
-          coll[i].addEventListener("click", function() {
-            this.classList.toggle("active");
-            var content = this.nextElementSibling;
-            if (content.style.maxHeight){
-              content.style.maxHeight = null;
-            } else {
-              content.style.maxHeight = content.scrollHeight + "px";
-            }
-          });
-        }
-        </script>
-    <div class = "main">
-        <h1 style=" color: #e0e0e0;"><u> About me</u></h1>
-        <p>I currently go by Snowy, but you might also know me as Shrunkmarrow708. <br>
-            Im a dyslexic 19-year-old that lives in the UK <br></p>
-            <p>I enjoy playing a variety of games with my friends and coding in python as part of this have made a couple of discord bots<br>
-                I have also started to learn HTML and decided to make this website dont ask why. <br>
-                I spend a lot of my time listening to music or watching YouTube. <br>
-                2 of my of my hobbies are white water kayaking and climbing<br>
-                while i may be dyslexic i am still a good reader but my hand writing and spelling are really shit<br>
-                <br>
 
+    <div class="layout">
+        <div class="intr">
+            <p class="intr-title"><u>Interests:</u></p>
 
+            <div class="accordion-group">
+                <button type="button" class="collapsible" aria-expanded="false">Coding</button>
+                <div class="content">
+                    <ul>
+                        <li>Python</li>
+                        <li>Py-cord</li>
+                        <li>HTML (obviously)</li>
+                    </ul>
+                </div>
+
+                <button type="button" class="collapsible" aria-expanded="false">Water sports</button>
+                <div class="content">
+                    <ul>
+                        <li>White water kayaking</li>
+                        <li>Canoeing</li>
+                        <li>Paddle boarding</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p class="interest-links">
+                <a href="https://snowy708.site/games">Gaming</a><br />
+                Climbing<br />
+                PC Building<br />
+                D&amp;D
             </p>
-                
-                <h2> as u can see im really not that interesting idk why i made this ;-;</h2>
-        
-    </div>
-    <div class = "links">
-        <h1 style=" color: #e0e0e0; size: 10px;"> <font size="4"><u>Links:</u></font></h1>
-        <p>
-            <a class="big_marginr"  style = color:aqua; href="https://github.com/Snowyshrunk/">Github</a>
-            <a class="big_marginr" style = color:aqua; href="https://discord.gg/K9TVeCBPuM">Discord server</a>
-            <a class="big_margin" style="color: #e0e0e0;">Discord Bots:</a>
-            <a class="big_margin" style = color:aqua; href="https://top.gg/bot/1041320378137587762">Snowflake (disabled)</a>
-            <a class="big_margin" style = color:aqua; href="https://top.gg/bot/1161697414013534378">Avalanche (disabled)</a>
-            <a class="big_margin" style = color:aqua; href="https://top.gg/bot/1103939031395467274">Gears</a>
-        </p>
-    </div>
-    <div class = "pic">
-        <img src="spotify_2023_wraped.jpeg" alt="image" height = "470" width="300"/>
-        <p> i listen to music way too much</p>
-    </div>
-    <div class = "vid">
-        <video src="hand_role.mp4" autoplay muted loop height= "200" width="300">
+        </div>
+
+        <div class="main">
+            <h1><u>About me</u></h1>
             <p>
-              Oh no! Your browser doesn't support video ;-;.<br>
-              id and a YouTube link but icba
+                I currently go by Snowy, but you might also know me as Shrunkmarrow708.<br />
+                Im a dyslexic 19-year-old that lives in the UK.
             </p>
-          </video> 
-        <p> idk why but heres a vid of me rolling a kayak<br>
-            with my hands.<br> 
-            why this vid? cause its only interesting vid<br> 
-            i had on hand at the time of writing this
-        </p>         
+            <p>
+                I enjoy playing a variety of games with my friends and coding in python, as part of this
+                have made a couple of discord bots.<br />
+                I have also started to learn HTML and decided to make this website dont ask why.<br />
+                I spend a lot of my time listening to music or watching YouTube.<br />
+                2 of my hobbies are white water kayaking and climbing.<br />
+                While I may be dyslexic I am still a good reader, but my handwriting and spelling are really rough.
+            </p>
+            <h2>as u can see im really not that interesting idk why i made this ;-;</h2>
+        </div>
+
+        <div class="side-column">
+            <div class="pic">
+                <img src="spotify_2023_wraped.jpeg" alt="Spotify wrapped image" />
+                <p>i listen to music way too much</p>
+            </div>
+
+            <div class="vid">
+                <video src="hand_role.mp4" autoplay muted loop playsinline>
+                    Your browser doesn't support video.
+                </video>
+                <p>
+                    idk why but heres a vid of me rolling a kayak with my hands.<br />
+                    Why this vid? cause its only interesting vid I had on hand at the time of writing this.
+                </p>
+            </div>
+        </div>
+
+        <div class="bottom">
+            <div class="links">
+                <h1><u>Links:</u></h1>
+                <p>
+                    <a href="https://github.com/Snowyshrunk/">Github</a>
+                    <a href="https://discord.gg/K9TVeCBPuM">Discord server</a>
+                    <span class="tag">Discord Bots:</span>
+                    <a href="https://top.gg/bot/1041320378137587762">Snowflake (disabled)</a>
+                    <a href="https://top.gg/bot/1161697414013534378">Avalanche (disabled)</a>
+                    <a href="https://top.gg/bot/1103939031395467274">Gears</a>
+                </p>
+            </div>
+
+            <div class="card">
+                <p>
+                    if u scrolled this far<br />
+                    WELL DONE!!<br />
+                    you win my bank details
+                </p>
+                <img src="visa_card.png" alt="card pic" />
+            </div>
+        </div>
     </div>
-    <div class = "card">
-        <p> if u scrolled this far<br> WELL DONE!!<br> you win my bank details<br>
-        </p>
-        <img src = "visa_card.png" alt="card pic" height="200" width="320"/> 
-    </div>
+
+    <script>
+        const coll = document.getElementsByClassName("collapsible");
+
+        for (let i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                this.setAttribute("aria-expanded", this.classList.contains("active") ? "true" : "false");
+                const content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        }
+    </script>
 </body>
 </html>
